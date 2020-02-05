@@ -1,0 +1,48 @@
+cd UAV_DATA
+workon py2stereo
+python split_dataset.py
+python voc_label_drone.py
+
+
+./darknet partial cfg/yolov2-tiny-voc.cfg weights/yolov2-tiny-voc.weights weights/yolov2-tiny-voc.conv.13 13
+./darknet partial cfg/yolov2-tiny.cfg weights/yolov2-tiny.weights weights/yolov2-tiny.conv.13 13
+./darknet partial cfg/yolov2.cfg weights/yolov2.weights weights/yolov2.conv.23 23
+./darknet partial cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.conv.81 81
+./darknet partial cfg/yolov3-tiny.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.conv.15 15
+
+gedit cfg/person.data
+classes= 1
+train  = /home/wpf/data/VOC/pascal/train.txt
+valid  = /home/wpf/data/VOC/pascal/2007_test.txt
+names = data/person.names
+backup = backup
+
+gedit data/person.names
+person
+
+cd ~/data/VOC/pascal
+python voc_label_person.py
+cat 2007_train.txt 2007_val.txt 2012_*.txt > train.txt
+
+mkdir log
+./darknet detector train cfg/person.data cfg/yolov2-tiny_person.cfg weights/yolov2-tiny.conv.13 -gpus 0 >> log/yolov2-tiny_person.log
+python plot.py -file log/yolov2-tiny_person.log
+
+cd /home/wpf/data/VOC/pascal
+python voc_label_car.py
+./darknet detector train cfg/voc_car.data cfg/yolov3-tiny_car.cfg ./weights/yolov3-tiny.conv.15 -gpus 0 >> log/yolov3-tiny_car.log
+python plot.py -file log/yolov3-tiny_car.log
+
+./darknet detector train cfg/voc_car.data cfg/yolov2-tiny_car.cfg ./weights/yolov2-tiny.conv.13 -gpus 0 >> log/yolov2-tiny_car.log
+python plot.py -file log/yolov2-tiny_car.log
+
+./darknet detector train cfg/voc_drone.data cfg/yolov3-tiny_drone.cfg ./weights/yolov3-tiny.conv.15 -gpus 0 >> log/yolov3-tiny_drone.log
+python plot.py -file log/yolov3-tiny_drone.log
+
+./darknet detector train cfg/voc_car_tuas.data cfg/yolov3-tiny_car.cfg ./weights/yolov3-tiny.conv.15 -gpus 0 >> log/yolov3-tiny_car_tuas.log
+python plot.py -file log/yolov3-tiny_car_tuas.log
+
+./darknet detector train cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone.cfg ./weights/yolov3-tiny.conv.15 -gpus 0,1 >> log/yolov3-tiny_drone_tuas.log
+python plot.py -file log/yolov3-tiny_drone_tuas.log
+./darknet detector test cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_test.cfg backup/yolov3-tiny_drone_tuas_final.weights /media/wpf/ssd/UAV_DATA/JPEGImages/0000.jpg
+./darknet detector test cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_test.cfg backup/yolov3-tiny_drone_40000.weights /media/wpf/ssd/UAV_DATA/JPEGImages/0000.jpg
