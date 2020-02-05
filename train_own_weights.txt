@@ -46,3 +46,7 @@ python plot.py -file log/yolov3-tiny_car_tuas.log
 python plot.py -file log/yolov3-tiny_drone_tuas.log
 ./darknet detector test cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_test.cfg backup/yolov3-tiny_drone_tuas_final.weights /media/wpf/ssd/UAV_DATA/JPEGImages/0000.jpg
 ./darknet detector test cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_test.cfg backup/yolov3-tiny_drone_40000.weights /media/wpf/ssd/UAV_DATA/JPEGImages/0000.jpg
+
+./darknet detector train cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_vga.cfg ./weights/yolov3-tiny.conv.15 -gpus 0,1 >> log/yolov3-tiny_drone_vga_tuas.log
+python plot.py -file log/yolov3-tiny_drone_vga_tuas.log
+./darknet detector test cfg/voc_drone_tuas.data cfg/yolov3-tiny_drone_test.cfg backup/yolov3-tiny_drone_vga_tuas_final.weights /media/wpf/ssd/UAV_DATA/JPEGImages/0000.jpg
